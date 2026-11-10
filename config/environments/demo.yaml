@@ -1,0 +1,5 @@
+# Public demo site. It is the only environment demoblaze has,
+# but the suite is set up so another env is just another yaml file.
+base_url: https://www.demoblaze.com
+api_url: https://api.demoblaze.com
+timeout_ms: 15000

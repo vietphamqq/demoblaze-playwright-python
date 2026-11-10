@@ -1,0 +1,23 @@
+[project]
+name = "demoblaze-playwright-python"
+version = "0.1.0"
+description = "UI and API test automation for demoblaze.com with Playwright and Pytest"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "smoke: quick checks for the main flows",
+    "regression: full regression set",
+    "api: tests that only talk to the API",
+    "ui: tests that use the browser",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
