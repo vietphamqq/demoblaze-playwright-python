@@ -1,7 +1,9 @@
+import allure
 import pytest
 from playwright.sync_api import expect
 
 
+@allure.title("Verify home page shows the first page of products on {browser_name}")
 @pytest.mark.smoke
 def test_home_page_shows_first_page_of_products(home_page, api):
     expected_titles = [p.title for p in api.get_products().Items]
@@ -11,6 +13,7 @@ def test_home_page_shows_first_page_of_products(home_page, api):
     expect(home_page.product_titles).to_have_text(expected_titles)
 
 
+@allure.title("Verify filtering products by {menu_item} on {browser_name}")
 @pytest.mark.parametrize(
     "menu_item, category",
     [("Phones", "phone"), ("Laptops", "notebook"), ("Monitors", "monitor")],
@@ -26,6 +29,7 @@ def test_filter_by_category(home_page, api, menu_item, category):
     expect(home_page.product_titles).to_have_text(expected_titles)
 
 
+@allure.title("Verify next page shows the next products on {browser_name}")
 def test_next_page(home_page, api):
     first = api.get_products()
     second = api.get_next_products(first.LastEvaluatedKey["id"])
@@ -37,6 +41,7 @@ def test_next_page(home_page, api):
     expect(home_page.product_titles).to_have_text([p.title for p in second.Items])
 
 
+@allure.title("Verify product details match the API on {browser_name}")
 def test_product_details_match_api(home_page, product_page, api):
     product = api.get_product(1)
     home_page.open()

@@ -1,9 +1,11 @@
+import allure
 import pytest
 from playwright.sync_api import expect
 
 from data.factories import new_user
 
 
+@allure.title("Verify sign up through the form on {browser_name}")
 def test_sign_up_through_the_form(home_page, api):
     user = new_user()
     home_page.open()
@@ -15,6 +17,7 @@ def test_sign_up_through_the_form(home_page, api):
     assert api.get_token(user.username, user.password)
 
 
+@allure.title("Verify sign up with a taken username shows an error on {browser_name}")
 def test_sign_up_with_taken_username(home_page, user):
     home_page.open()
 
@@ -23,6 +26,7 @@ def test_sign_up_with_taken_username(home_page, user):
     assert message == "This user already exist."
 
 
+@allure.title("Verify login and logout successfully on {browser_name}")
 @pytest.mark.smoke
 def test_log_in_and_log_out(home_page, user):
     home_page.open()
@@ -36,6 +40,7 @@ def test_log_in_and_log_out(home_page, user):
     expect(home_page.navbar.welcome_text).to_be_hidden()
 
 
+@allure.title("Verify login shows '{expected}' on {browser_name}")
 @pytest.mark.parametrize(
     "case, expected",
     [
@@ -54,6 +59,7 @@ def test_log_in_errors(home_page, user, case, expected):
     expect(home_page.navbar.welcome_text).to_be_hidden()
 
 
+@allure.title("Verify user is logged in with a token from the API on {browser_name}")
 def test_session_from_api_token(home_page, logged_in):
     # the logged_in fixture never touches the login form
     home_page.open()

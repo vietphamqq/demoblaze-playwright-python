@@ -3,6 +3,7 @@
 Faster and less flaky than clicking through product pages just to get data in place.
 """
 
+import allure
 import pytest
 from playwright.sync_api import expect
 
@@ -16,6 +17,7 @@ def seeded_cart(logged_in, api, token):
     return [api.get_product(pid) for pid in PRODUCT_IDS]
 
 
+@allure.title("Verify cart shows seeded products and total on {browser_name}")
 @pytest.mark.smoke
 def test_cart_shows_seeded_products_and_total(seeded_cart, cart_page):
     cart_page.open()
@@ -26,6 +28,7 @@ def test_cart_shows_seeded_products_and_total(seeded_cart, cart_page):
     expect(cart_page.total).to_have_text(f"{sum(p.price for p in seeded_cart):g}")
 
 
+@allure.title("Verify deleting from the cart updates the backend on {browser_name}")
 def test_delete_from_cart_updates_backend(seeded_cart, cart_page, api, token):
     removed, *kept = seeded_cart
     cart_page.open()

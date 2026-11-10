@@ -1,5 +1,6 @@
 import re
 
+import allure
 import pytest
 from playwright.sync_api import expect
 
@@ -15,6 +16,7 @@ def cart_with_product(logged_in, api, token):
     return product
 
 
+@allure.title("Verify placing an order successfully on {browser_name}")
 @pytest.mark.smoke
 def test_place_order(cart_with_product, cart_page, ui, api, token):
     order = new_order()
@@ -40,6 +42,7 @@ def test_place_order(cart_with_product, cart_page, ui, api, token):
     expect(ui).to_have_url(re.compile(r"/index\.html$"))
 
 
+@allure.title("Verify placing an order without name and card shows an error on {browser_name}")
 def test_place_order_without_name_and_card(cart_with_product, cart_page):
     cart_page.open()
     expect(cart_page.rows).to_have_count(1)

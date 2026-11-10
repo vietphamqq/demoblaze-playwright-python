@@ -1,9 +1,11 @@
+import allure
 import pytest
 
 from api.models import ApiError
 from data.factories import new_user
 
 
+@allure.title("Verify sign up creates a new user")
 @pytest.mark.smoke
 def test_sign_up_new_user(api):
     user = new_user()
@@ -15,12 +17,14 @@ def test_sign_up_new_user(api):
     assert response.json() == ""
 
 
+@allure.title("Verify sign up is rejected for an existing username")
 def test_sign_up_existing_user_is_rejected(api, user):
     response = api.sign_up(user.username, "whatever123")
 
     assert ApiError(**response.json()).errorMessage == "This user already exist."
 
 
+@allure.title("Verify login returns a valid token for the user")
 @pytest.mark.smoke
 def test_log_in_returns_token_for_that_user(api, user):
     token = api.get_token(user.username, user.password)
@@ -30,6 +34,7 @@ def test_log_in_returns_token_for_that_user(api, user):
     assert info.token == token
 
 
+@allure.title("Verify login returns error '{expected}'")
 @pytest.mark.parametrize(
     "case, expected",
     [
