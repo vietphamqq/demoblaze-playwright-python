@@ -1,0 +1,106 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 3 * * *" # nightly run
+  workflow_dispatch:
+    inputs:
+      env:
+        description: Environment file to use
+        default: demo
+      marker:
+        description: "Pytest marker expression, e.g. smoke"
+        default: ""
+
+env:
+  TEST_ENV: ${{ github.event.inputs.env || 'demo' }}
+  MARKER: ${{ github.event.inputs.marker || '' }}
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff==0.17.4
+      - run: ruff check .
+      - run: ruff format --check .
+
+  api:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Run API tests
+        run: |
+          pytest tests/api --env "$TEST_ENV" ${MARKER:+-m "$MARKER"} \
+            -n auto --reruns 1 \
+            --alluredir allure-results --junitxml junit/api.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-results-api
+          path: allure-results
+
+  ui:
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: playwright install --with-deps ${{ matrix.browser }}
+      - name: Run UI tests
+        run: |
+          pytest tests/e2e tests/hybrid --env "$TEST_ENV" ${MARKER:+-m "$MARKER"} \
+            --browser ${{ matrix.browser }} -n auto --reruns 1 \
+            --tracing retain-on-failure --screenshot only-on-failure --output test-results \
+            --alluredir allure-results --junitxml junit/ui-${{ matrix.browser }}.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-results-${{ matrix.browser }}
+          path: allure-results
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: traces-${{ matrix.browser }}
+          path: test-results
+
+  report:
+    needs: [api, ui]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: allure-results-*
+          path: allure-results
+          merge-multiple: true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - run: npm install -g allure-commandline
+      - run: allure generate allure-results -o allure-report --clean
+      - uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report
