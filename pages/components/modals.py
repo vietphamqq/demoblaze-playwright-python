@@ -1,3 +1,4 @@
+import allure
 from playwright.sync_api import Page
 
 from data.factories import OrderDetails
@@ -12,6 +13,7 @@ class SignUpModal:
         self.password = self.root.locator("#sign-password")
         self.submit = self.root.get_by_role("button", name="Sign up")
 
+    @allure.step("Sign up as {username}")
     def sign_up(self, username: str, password: str) -> str:
         """Returns the alert text."""
         self.username.fill(username)
@@ -27,11 +29,13 @@ class LoginModal:
         self.password = self.root.locator("#loginpassword")
         self.submit = self.root.get_by_role("button", name="Log in")
 
+    @allure.step("Log in as {username}")
     def log_in(self, username: str, password: str):
         self.username.fill(username)
         self.password.fill(password)
         self.submit.click()
 
+    @allure.step("Log in as {username} and read the alert")
     def log_in_expecting_alert(self, username: str, password: str) -> str:
         self.username.fill(username)
         self.password.fill(password)
@@ -51,6 +55,7 @@ class OrderModal:
         self.year = self.root.locator("#year")
         self.purchase_button = self.root.get_by_role("button", name="Purchase")
 
+    @allure.step("Fill the order form")
     def fill(self, order: OrderDetails):
         self.name.fill(order.name)
         self.country.fill(order.country)
@@ -59,9 +64,11 @@ class OrderModal:
         self.month.fill(order.month)
         self.year.fill(order.year)
 
+    @allure.step("Click Purchase")
     def purchase(self):
         self.purchase_button.click()
 
+    @allure.step("Click Purchase and read the alert")
     def purchase_expecting_alert(self) -> str:
         return accept_alert(self.page, self.purchase_button.click)
 
@@ -74,6 +81,10 @@ class PurchaseConfirmation:
         self.title = self.root.locator("h2")
         self.details = self.root.locator("p.lead")
         self.ok_button = self.root.locator("button.confirm")
+
+    @allure.step("Close the purchase confirmation")
+    def close(self):
+        self.ok_button.click()
 
     def detail(self, label: str) -> str:
         # details text looks like "Id: 123\nAmount: 360 USD\nCard Number: ...\nName: ..."

@@ -36,7 +36,7 @@ def test_next_page(home_page, api):
     home_page.open()
     expect(home_page.product_titles).to_have_count(len(first.Items))
 
-    home_page.next_button.click()
+    home_page.go_to_next_page()
 
     expect(home_page.product_titles).to_have_text([p.title for p in second.Items])
 

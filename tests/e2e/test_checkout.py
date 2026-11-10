@@ -37,7 +37,7 @@ def test_place_order(cart_with_product, cart_page, ui, api, token):
     # placing the order empties the cart on the backend, but not instantly
     wait_until(lambda: api.get_cart(token).Items == [], message="cart was not emptied")
 
-    confirmation.ok_button.click()
+    confirmation.close()
     # the site redirects to the home page a couple of seconds after OK
     expect(ui).to_have_url(re.compile(r"/index\.html$"))
 

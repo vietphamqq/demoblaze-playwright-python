@@ -1,3 +1,4 @@
+import allure
 from playwright.sync_api import Page
 
 from pages.components.navbar import Navbar
@@ -11,6 +12,8 @@ class BasePage:
         self.navbar = Navbar(page)
 
     def open(self):
-        # base_url comes from the browser context, see conftest.py
-        self.page.goto(self.path)
+        # step title is built here because allure.step cannot read self
+        with allure.step(f"Open {self.path}"):
+            # base_url comes from the browser context, see conftest.py
+            self.page.goto(self.path)
         return self

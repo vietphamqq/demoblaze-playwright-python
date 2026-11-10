@@ -1,3 +1,5 @@
+import allure
+
 from pages.base_page import BasePage
 from utils.dialogs import accept_alert
 
@@ -12,9 +14,11 @@ class ProductPage(BasePage):
         self.description = page.locator("#more-information p")
         self.add_to_cart_button = page.get_by_role("link", name="Add to cart")
 
+    @allure.step("Open product page for id {product_id}")
     def open_product(self, product_id: int):
         self.page.goto(f"{self.path}?idp_={product_id}")
         return self
 
+    @allure.step("Add the product to the cart")
     def add_to_cart(self) -> str:
         return accept_alert(self.page, self.add_to_cart_button.click)
