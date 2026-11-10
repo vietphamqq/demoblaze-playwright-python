@@ -55,18 +55,19 @@ jobs:
   ui:
     needs: lint
     runs-on: ubuntu-latest
+    container:
+      # keep the tag in sync with playwright in requirements.txt
+      image: mcr.microsoft.com/playwright/python:v1.63.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root # firefox fails if HOME is not owned by the current user
     strategy:
       fail-fast: false
       matrix:
         browser: [chromium, firefox]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
       - run: pip install -r requirements.txt
-      - run: playwright install --with-deps ${{ matrix.browser }}
       - name: Run UI tests
         run: |
           pytest tests/e2e tests/hybrid --env "$TEST_ENV" ${MARKER:+-m "$MARKER"} \
